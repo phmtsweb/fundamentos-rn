@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { Header } from "../components/Header";
 import { Task, TasksList } from "../components/TasksList";
 import { TodoInput } from "../components/TodoInput";
@@ -7,7 +7,32 @@ import { TodoInput } from "../components/TodoInput";
 export function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
+  const taskExistsAlert = () =>
+    Alert.alert(
+      "Task already created",
+      "You can not create two tasks with the same name",
+      [
+        {
+          text: "OK",
+        },
+      ]
+    );
+
+  function handleEditTask(id: number, taskNewTitle: string) {
+    setTasks((oldTasks) =>
+      oldTasks.map((task) => ({
+        id: task.id,
+        title: task.id === id ? taskNewTitle : task.title,
+        done: task.done,
+      }))
+    );
+  }
+
   function handleAddTask(newTaskTitle: string) {
+    const taskExists = tasks.find((task) => task.title === newTaskTitle);
+    if (taskExists) {
+      return taskExistsAlert();
+    }
     const task = {
       id: new Date().getTime(),
       title: newTaskTitle,
@@ -42,6 +67,7 @@ export function Home() {
         tasks={tasks}
         toggleTaskDone={handleToggleTaskDone}
         removeTask={handleRemoveTask}
+        editTask={handleEditTask}
       />
     </View>
   );
